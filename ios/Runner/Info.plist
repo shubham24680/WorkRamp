@@ -60,5 +60,9 @@
 				</array>
 			</dict>
 		</array>
-	</dict>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>This app needs your location to mark attendance accurately.</string>
+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>This app needs your location even when running in the background.</string>
+    </dict>
 </plist>

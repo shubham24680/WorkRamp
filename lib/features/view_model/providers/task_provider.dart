@@ -2,7 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:tickit/features/model/task.dart';
-import 'package:tickit/services/task_curd.dart';
+
+import '../../../core/services/task_curd.dart';
 
 class TaskProvider extends ChangeNotifier {
   final TaskDB _db = TaskDB();

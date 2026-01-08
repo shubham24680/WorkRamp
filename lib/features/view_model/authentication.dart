@@ -1,12 +1,6 @@
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'package:tickit/features/view/home/home.dart';
-import 'package:tickit/features/view/loading.dart';
-import 'package:tickit/features/view/no_connection.dart';
-import 'package:tickit/features/view/onboarding/onboarding.dart';
+import '../../app.dart';
 
 class Authentication extends StatefulWidget {
   const Authentication({super.key});
@@ -23,16 +17,16 @@ class _AuthenticationState extends State<Authentication> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           log("Waiting");
-          return Loading();
+          return AlertScreen();
         } else if (snapshot.hasError) {
           log("NoConnection");
-          return NoConnection();
+          return AlertScreen();
         } else if (snapshot.hasData && snapshot.data!.session != null) {
           log("Home");
           return Home();
         } else {
           log("Onboarding");
-          return Onboarding();
+          return OnboardingScreen();
         }
       },
     );

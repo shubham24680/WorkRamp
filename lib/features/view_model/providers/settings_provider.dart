@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:tickit/services/settings_curd.dart';
+
+import '../../../core/services/settings_curd.dart';
 
 class SettingsProvider extends ChangeNotifier {
   final SettingsDB _db = SettingsDB();
