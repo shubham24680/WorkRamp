@@ -1,6 +1,13 @@
 import '../../app.dart';
 
-enum ImageType { REMOTE, LOCAL, SVG_REMOTE, SVG_LOCAL }
+enum ImageType {
+  REMOTE,
+  LOCAL,
+  SVG_REMOTE,
+  SVG_LOCAL,
+  LOTTIE_LOCAL,
+  LOTTIE_REMOTE
+}
 
 class CustomImage extends StatelessWidget {
   const CustomImage(
@@ -27,13 +34,6 @@ class CustomImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Image localImage = Image.asset(
-      imageUrl ?? AppImages.PLACEHOLDER,
-      fit: fit ?? BoxFit.cover,
-      height: height,
-      width: width,
-    );
-
     Widget image;
     switch (imageType) {
       case ImageType.REMOTE:
@@ -61,8 +61,37 @@ class CustomImage extends StatelessWidget {
             height: height,
             width: width);
         break;
+      case ImageType.SVG_REMOTE:
+        image = SvgPicture.network(imageUrl ?? "",
+            placeholderBuilder: (context) => (placeholder != null)
+                ? placeholder!
+                : customShimmer(height: height, width: width),
+            errorBuilder: (context, url, error) => CustomImage(
+                imageType: ImageType.SVG_LOCAL,
+                fit: fit ?? BoxFit.cover,
+                height: height,
+                width: height),
+            colorFilter: (color != null)
+                ? ColorFilter.mode(color!, BlendMode.srcIn)
+                : null,
+            fit: fit ?? BoxFit.contain,
+            height: height,
+            width: width);
+        break;
+      case ImageType.LOTTIE_LOCAL:
+        image = Lottie.asset(imageUrl ?? AppLotties.LOADING);
+        break;
+      case ImageType.LOTTIE_REMOTE:
+        image = Lottie.asset(imageUrl ?? AppLotties.LOADING,
+            fit: fit ?? BoxFit.contain, height: height, width: width);
+        break;
       default:
-        image = localImage;
+        image = Image.asset(
+          imageUrl ?? AppImages.PLACEHOLDER,
+          fit: fit ?? BoxFit.cover,
+          height: height,
+          width: width,
+        );
         break;
     }
 

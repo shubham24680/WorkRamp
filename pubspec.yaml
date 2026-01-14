@@ -73,10 +73,10 @@ flutter_native_splash:
   ios: true
 
   color: "#FFFFFF"
-  image: assets/icons/TickIt.png
+  image: assets/images/workRamp_12.png
   android_12:
     color: "#FFFFFF"
-    image: assets/icons/TickIt_max.png
+    image: assets/images/work_ramp_12.png
 
 dev_dependencies:
   flutter_test:

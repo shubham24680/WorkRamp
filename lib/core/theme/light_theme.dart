@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tickit/core/utils/app_colors.dart';
 
 final ThemeData light = ThemeData(
-  scaffoldBackgroundColor: AppColor.white,
+  scaffoldBackgroundColor: Colors.grey.shade50,
   colorScheme: ColorScheme.light(
     primary: AppColor.white,
     secondary: AppColor.white),

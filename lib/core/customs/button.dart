@@ -34,7 +34,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widgetBackgroundColor =
-        backgroundColor ?? AppColor.white.withAlpha(20);
+        backgroundColor ?? AppColor.black5.withAlpha(40);
     final widgetBorderRadius = BorderRadius.circular(
         borderRadius ?? (buttonType == ButtonType.ICON ? 1.sh : 12.r));
 
@@ -55,12 +55,13 @@ class CustomButton extends StatelessWidget {
       case ButtonType.ICON:
         baseButton = IconButton(
             onPressed: onPressed,
+            padding: EdgeInsets.all(2.w),
+            constraints: buttonNature == ButtonNature.BOUNDED ? BoxConstraints() : null,
             style: IconButton.styleFrom(
-                backgroundColor:
-                    backgroundColor ?? AppColor.black5.withAlpha(70),
+                backgroundColor: widgetBackgroundColor,
+                fixedSize: (height != null) ? Size(height ?? 0, height ?? 0) : null,
                 shape: const CircleBorder()),
             icon: SvgPicture.asset(icon ?? AppSvgs.SETTINGS,
-                height: height ?? 24.w,
                 colorFilter: ColorFilter.mode(
                     forgroundColor ?? AppColor.white.withAlpha(200),
                     BlendMode.srcIn)));

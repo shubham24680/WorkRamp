@@ -123,7 +123,6 @@ class ProfileScreen extends ConsumerWidget {
             ? null
             : () async {
                 await authNotifier.signOut();
-                ref.read(keyProvider.notifier).state++;
                 if (context.mounted && authState.user.user == null) {
                   context.go("/");
                 }

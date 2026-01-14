@@ -24,6 +24,7 @@ class LocationService {
       // Check if location service is enabled
       bool serviceEnabled = await isLocationServiceEnabled();
       if (!serviceEnabled) {
+        await Geolocator.openLocationSettings();
         throw Exception(
             'Location services are disabled. Please enable location services.');
       }
@@ -213,88 +214,4 @@ class CheckInValidationResult {
     required this.locationData,
     this.distanceFromOffice,
   });
-}
-
-class OfficeLocationService {
-  final SupabaseClient _supabase = Supabase.instance.client;
-
-  // Create new office location (Admin/HR only)
-  Future<void> createOfficeLocation(OfficeLocation location) async {
-    try {
-      await _supabase.from('office_locations').insert(location.toJson());
-    } catch (e) {
-      print('Error creating office location: $e');
-      rethrow;
-    }
-  }
-
-  // Get all office locations
-  Future<List<OfficeLocation>> getAllOfficeLocations() async {
-    try {
-      final response = await _supabase
-          .from('office_locations')
-          .select()
-          .eq('is_active', true);
-
-      return (response as List)
-          .map((item) => OfficeLocation.fromJson(item))
-          .toList();
-    } catch (e) {
-      print('Error getting office locations: $e');
-      return [];
-    }
-  }
-
-  // Get office location by ID
-  Future<OfficeLocation?> getOfficeLocationById(String locationId) async {
-    try {
-      final response = await _supabase
-          .from('office_locations')
-          .select()
-          .eq('id', locationId)
-          .maybeSingle();
-
-      if (response == null) return null;
-      return OfficeLocation.fromJson(response);
-    } catch (e) {
-      print('Error getting office location: $e');
-      return null;
-    }
-  }
-
-  // Update office location
-  Future<void> updateOfficeLocation(OfficeLocation location) async {
-    try {
-      await _supabase
-          .from('office_locations')
-          .update(location.toJson())
-          .eq('id', location.locationId);
-    } catch (e) {
-      print('Error updating office location: $e');
-      rethrow;
-    }
-  }
-
-  // Delete office location (soft delete)
-  Future<void> deleteOfficeLocation(String locationId) async {
-    try {
-      await _supabase.from('office_locations').update({
-        'is_active': false,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', locationId);
-    } catch (e) {
-      print('Error deleting office location: $e');
-      rethrow;
-    }
-  }
-
-  // Stream of office locations
-  Stream<List<OfficeLocation>> officeLocationsStream() {
-    return _supabase
-        .from('office_locations')
-        .stream(primaryKey: ['id'])
-        .eq('is_active', true)
-        .map((data) =>
-            data.map((item) => OfficeLocation.fromJson(item)).toList());
-  }
 }

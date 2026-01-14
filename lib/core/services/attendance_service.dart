@@ -1,7 +1,5 @@
 import 'dart:developer';
-
 import 'package:intl/intl.dart';
-
 import '../../app.dart';
 
 class AttendanceService {
@@ -23,7 +21,7 @@ class AttendanceService {
           .maybeSingle();
 
       log("Today Attendance - $startOfDay, $endOfDay: $response");
-      return (response == null) ? null: AttendanceModel.fromJson(response);
+      return (response == null) ? null : AttendanceModel.fromJson(response);
     } catch (e) {
       print('Error getting today attendance: $e');
       return null;
@@ -41,9 +39,7 @@ class AttendanceService {
       final todayAttendance = await getTodayAttendance(user.userId);
       if (todayAttendance != null && todayAttendance.checkInTime != null) {
         return CheckInResult(
-          success: false,
-          message: 'You have already checked in today',
-        );
+            success: false, message: 'You have already checked in today');
       }
 
       // Get current location
@@ -53,14 +49,14 @@ class AttendanceService {
       try {
         position = await _locationService.getCurrentLocation();
         debugPrint(
-            "CURRENT LOCATION - Lat ${position?.latitude} Long ${position?.longitude}\nOFFICE LOCATION - Lat ${officeLocation.latitude}, Long ${officeLocation.longitude}");
+            "CHECK IN CURRENT LOCATION - Lat ${position?.latitude} Long ${position?.longitude}\nOFFICE LOCATION - Lat ${officeLocation.latitude}, Long ${officeLocation.longitude}");
         if (position != null) {
           locationData = await _locationService.createLocationData(position);
         }
       } catch (e) {
         return CheckInResult(
           success: false,
-          message: 'Failed to get location: ${e.toString()}',
+          message: 'Failed to get location.',
         );
       }
 
@@ -91,16 +87,15 @@ class AttendanceService {
       // Create attendance record
       final now = DateTime.now();
       final attendance = AttendanceModel(
-        userId: user.userId,
-        date: now,
-        checkInTime: now,
-        checkInLat: locationData.latitude,
-        checkInLong: locationData.longitude,
-        checkInAddress: locationData.address,
-        officeLocationId: officeLocation.locationId,
-        workType: workType,
-        status: AttendanceStatus.present,
-      );
+          userId: user.userId,
+          date: now,
+          checkInTime: now,
+          checkInLat: locationData.latitude,
+          checkInLong: locationData.longitude,
+          checkInAddress: locationData.address,
+          officeLocationId: officeLocation.locationId,
+          workType: workType,
+          status: AttendanceStatus.present);
 
       await _supabase.from('attendance').insert(attendance.toJson());
 
@@ -123,6 +118,7 @@ class AttendanceService {
   // Check out
   Future<CheckOutResult> checkOut({
     required UserModel user,
+    required OfficeLocation officeLocation,
     required AttendanceModel todayAttendance,
   }) async {
     try {
@@ -132,6 +128,8 @@ class AttendanceService {
 
       try {
         position = await _locationService.getCurrentLocation();
+        debugPrint(
+            "CHECK OUT CURRENT LOCATION - Lat ${position?.latitude} Long ${position?.longitude}\nOFFICE LOCATION - Lat ${officeLocation.latitude}, Long ${officeLocation.longitude}");
         if (position != null) {
           locationData = await _locationService.createLocationData(position);
         }
@@ -140,35 +138,58 @@ class AttendanceService {
         // Continue with checkout even if location fails
       }
 
-      final now = DateTime.now();
+      if (position == null || locationData == null) {
+        return CheckOutResult(
+          success: false,
+          message: 'Unable to get your current location',
+        );
+      }
 
-      // Calculate total hours
-      double? totalHours;
-      double? overtimeHours;
-      if (todayAttendance.checkInTime != null) {
-        final duration = now.difference(todayAttendance.checkInTime!);
-        totalHours = duration.inMinutes / 60.0;
+      // Validate location if required
+      if (!user.canCheckInAnywhere) {
+        final validation = await _locationService.validateCheckIn(
+          currentPosition: position,
+          officeLocation: officeLocation,
+          canCheckInAnywhere: user.canCheckInAnywhere,
+        );
 
-        // Calculate overtime (assuming 9 hours is standard)
-        const standardHours = 9.0;
-        if (totalHours > standardHours) {
-          overtimeHours = totalHours - standardHours;
+        if (!validation.isValid) {
+          return CheckOutResult(
+              success: false,
+              message: validation.message,
+              currentLocation: locationData);
         }
       }
-      log("WORKING HR. - $totalHours, $overtimeHours");
+
+      final now = DateTime.now();
+      final checkInTime = todayAttendance.checkInTime;
+      int? totalHours;
+      int? overtimeHours;
+
+      if (checkInTime != null) {
+        final duration = now.difference(checkInTime);
+        totalHours = duration.inMinutes;
+
+        final overtime = totalHours - 540;
+        if (overtime >= 0) {
+          overtimeHours = overtime;
+        }
+      }
 
       // Update attendance record
       final updatedAttendance = todayAttendance.copyWith(
-        checkOutTime: now,
-        checkOutLat: locationData?.latitude,
-        checkOutLong: locationData?.longitude,
-        checkOutAddress: locationData?.address,
-        totalHours: totalHours,
-        overtimeHours: overtimeHours,
-      );
+          checkOutTime: now,
+          checkOutLat: locationData.latitude,
+          checkOutLong: locationData.longitude,
+          checkOutAddress: locationData.address,
+          totalHours: totalHours,
+          overtimeHours: overtimeHours,
+          status: (overtimeHours != null)
+              ? AttendanceStatus.present
+              : AttendanceStatus.halfDay);
 
       final id = todayAttendance.attendanceId;
-      if(id == null) {
+      if (id == null) {
         return CheckOutResult(
           success: false,
           message: 'Failed to check out: CHECKOUT',
@@ -177,10 +198,7 @@ class AttendanceService {
 
       final response = updatedAttendance.toJson();
       log("UPDATED ATTENDANCE - $response, ID - $id");
-      await _supabase
-          .from('attendance')
-          .update(response)
-          .eq('id', id);
+      await _supabase.from('attendance').update(response).eq('id', id);
 
       return CheckOutResult(
         success: true,
@@ -210,10 +228,10 @@ class AttendanceService {
       var query = _supabase.from('attendance').select().eq('user_id', userId);
 
       if (startDate != null) {
-        query = query.gte('date', startDate.toIso8601String());
+        query = query.gte('date', startDate.toUtc().toIso8601String());
       }
       if (endDate != null) {
-        query = query.lte('date', endDate.toIso8601String());
+        query = query.lte('date', endDate.toUtc().toIso8601String());
       }
 
       final response = await query.order('date', ascending: false).limit(limit);
@@ -237,47 +255,48 @@ class AttendanceService {
       final endDate = DateTime(year, month + 1, 0);
 
       final attendances = await getAttendanceHistory(
-        userId: userId,
-        startDate: startDate,
-        endDate: endDate,
-        limit: 31,
-      );
+          userId: userId, startDate: startDate, endDate: endDate, limit: 31);
 
       int presentDays = 0;
       int absentDays = 0;
-      int lateDays = 0;
-      double totalWorkHours = 0;
-      double totalOvertimeHours = 0;
+      int halfDays = 0;
+      int totalWorkHours = 0;
+      int totalOvertimeHours = 0;
 
       for (var attendance in attendances) {
         if (attendance.status == AttendanceStatus.present) {
           presentDays++;
         } else if (attendance.status == AttendanceStatus.absent) {
           absentDays++;
-        } else if (attendance.status == AttendanceStatus.late) {
-          lateDays++;
+        } else if (attendance.status == AttendanceStatus.halfDay) {
+          halfDays++;
         }
 
-        if (attendance.totalHours != null) {
-          totalWorkHours += attendance.totalHours!;
+        final totalHours = attendance.totalHours;
+        final overtimeTotalHours = attendance.overtimeHours;
+        if (totalHours != null) {
+          totalWorkHours += totalHours;
         }
-        if (attendance.overtimeHours != null) {
-          totalOvertimeHours += attendance.overtimeHours!;
+        if (overtimeTotalHours != null) {
+          totalOvertimeHours += overtimeTotalHours;
         }
       }
 
-      final totalDays = endDate.day;
-      final attendancePercentage = (presentDays / totalDays) * 100;
+      final totalDays = presentDays + halfDays + absentDays;
+      int? averageWorkHours;
+      if (totalDays > 0) {
+        averageWorkHours = totalWorkHours ~/ totalDays;
+      }
 
       return AttendanceSummary(
         month: month,
         year: year,
         presentDays: presentDays,
         absentDays: absentDays,
-        lateDays: lateDays,
+        halfDays: halfDays,
         totalWorkHours: totalWorkHours,
         totalOvertimeHours: totalOvertimeHours,
-        attendancePercentage: attendancePercentage,
+        averageWorkHours: averageWorkHours ?? 0,
         attendances: attendances,
       );
     } catch (e) {
@@ -288,9 +307,10 @@ class AttendanceService {
         presentDays: 0,
         absentDays: 0,
         lateDays: 0,
+        halfDays: 0,
         totalWorkHours: 0,
         totalOvertimeHours: 0,
-        attendancePercentage: 0,
+        averageWorkHours: 0,
         attendances: [],
       );
     }
@@ -317,7 +337,7 @@ class CheckOutResult {
   final String message;
   final AttendanceModel? attendance;
   final LocationData? currentLocation;
-  final double? totalHours;
+  final int? totalHours;
 
   CheckOutResult({
     required this.success,
@@ -333,10 +353,11 @@ class AttendanceSummary {
   final int year;
   final int presentDays;
   final int absentDays;
+  final int halfDays;
   final int lateDays;
-  final double totalWorkHours;
-  final double totalOvertimeHours;
-  final double attendancePercentage;
+  final int totalWorkHours;
+  final int averageWorkHours;
+  final int totalOvertimeHours;
   final List<AttendanceModel> attendances;
 
   AttendanceSummary({
@@ -344,10 +365,11 @@ class AttendanceSummary {
     required this.year,
     required this.presentDays,
     required this.absentDays,
-    required this.lateDays,
+    required this.halfDays,
+    this.lateDays = 0,
     required this.totalWorkHours,
+    required this.averageWorkHours,
     required this.totalOvertimeHours,
-    required this.attendancePercentage,
     required this.attendances,
   });
 }

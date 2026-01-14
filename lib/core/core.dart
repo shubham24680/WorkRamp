@@ -9,12 +9,15 @@ export 'customs/text.dart';
 export 'customs/button.dart';
 export 'customs/chip.dart';
 export 'customs/text_field.dart';
+export 'customs/provider_observers.dart';
 
 export 'packages/app_packages.dart';
 
 export 'services/email_auth_service.dart';
 export 'services/location_service.dart';
+export 'services/office_location_service.dart';
 export 'services/attendance_service.dart';
+export 'services/user_service.dart';
 
 export 'theme/light_theme.dart';
 export 'theme/dark_theme.dart';

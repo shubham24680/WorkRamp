@@ -1,10 +1,6 @@
 import '../../app.dart';
 
-enum ScreenType {
-  LOADING,
-  ERROR,
-  VERIFY
-}
+enum ScreenType { LOADING, ERROR, VERIFY, SPLASH }
 
 class AlertScreen extends StatelessWidget {
   const AlertScreen({super.key, this.type = ScreenType.LOADING});
@@ -13,6 +9,7 @@ class AlertScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageType imageType = ImageType.LOTTIE_LOCAL;
     String image;
     String? text;
 
@@ -21,9 +18,13 @@ class AlertScreen extends StatelessWidget {
         image = AppLotties.ERROR;
         text = "Something went wrong!";
         break;
-        case ScreenType.VERIFY:
+      case ScreenType.VERIFY:
         image = AppLotties.VERIFY;
         text = "Hang tight!\nWe’re verifying your details.";
+        break;
+      case ScreenType.SPLASH:
+        imageType = ImageType.LOCAL;
+        image = AppImages.LOGO;
         break;
       default:
         image = AppLotties.LOADING;
@@ -31,11 +32,12 @@ class AlertScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
         body: SizedBox(
             width: 1.sw,
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Lottie.asset(image),
+              CustomImage(imageType: imageType, imageUrl: image),
               if (text != null)
                 CustomText(
                     text: text,

@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import '../../app.dart';
 
 final profileProvider = FutureProvider<UserModel>((ref) async {
@@ -8,5 +7,10 @@ final profileProvider = FutureProvider<UserModel>((ref) async {
   log("Current User - $user");
   if (user == null) throw Exception;
 
-  return await EmailAuthService().getUserProfile(user.id);
+  return await UserService().getUserProfile(user.id);
+});
+
+final otherUserData =
+    FutureProvider.family<UserModel, String>((ref, userId) async {
+  return await UserService().getUserProfile(userId);
 });

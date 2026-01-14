@@ -8,5 +8,5 @@ final locationProvider = FutureProvider<OfficeLocation>((ref) async {
   log("[LOCATION PROVIDER] Location Id - $officeLocationId");
   if (officeLocationId == null) throw Exception;
 
-  return await EmailAuthService().getOfficeLocation(officeLocationId);
+  return await OfficeLocationService().getOfficeLocation(officeLocationId);
 });

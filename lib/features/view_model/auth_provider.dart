@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import '../../app.dart';
 
 class AuthenticationState {
@@ -34,7 +33,9 @@ class AuthenticationState {
 }
 
 class AuthNotifier extends StateNotifier<AuthenticationState> {
-  AuthNotifier() : super(AuthenticationState.initial());
+  final Ref ref;
+
+  AuthNotifier(this.ref) : super(AuthenticationState.initial());
 
   Future<void> signIn(String email, String password) async {
     state = state.copyWith(isLoading: true);
@@ -44,20 +45,27 @@ class AuthNotifier extends StateNotifier<AuthenticationState> {
           await EmailAuthService().signIn(email: email, password: password);
       log("Auth Notifier - Sign In - $auth");
       state = state.copyWith(user: auth, isLoading: false);
-    } on AuthException catch(e) {
-      state = state.copyWith(statusCode: e.statusCode, errorMessage: e.message, isLoading: false);
-    }
-    catch (e) {
+    } on AuthException catch (e) {
+      state = state.copyWith(
+          statusCode: e.statusCode, errorMessage: e.message, isLoading: false);
+    } catch (e) {
       state = state.copyWith(errorMessage: e.toString(), isLoading: false);
     }
   }
 
-  Future<void> signUp(String email, String password, String name) async {
+  Future<void> signUp(String email, String password) async {
     state = state.copyWith(isLoading: true);
 
     try {
-      final auth = await EmailAuthService()
-          .signUp(email: email, password: password, name: name);
+      final isEmailExist = await EmailAuthService().isEmailExists(email);
+      if (isEmailExist) {
+        state = state.copyWith(
+            errorMessage: "Email already exists", isLoading: false);
+        return;
+      }
+
+      final auth =
+          await EmailAuthService().signUp(email: email, password: password);
       state = state.copyWith(user: auth, isLoading: false);
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString(), isLoading: false);
@@ -69,6 +77,7 @@ class AuthNotifier extends StateNotifier<AuthenticationState> {
 
     try {
       await EmailAuthService().signOut();
+      await MyAppProviders.invalidateAllProviders(ref);
       state = state.copyWith(user: AuthResponse(user: null), isLoading: false);
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString(), isLoading: false);
@@ -77,7 +86,7 @@ class AuthNotifier extends StateNotifier<AuthenticationState> {
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthenticationState>(
-    (ref) => AuthNotifier());
+    (ref) => AuthNotifier(ref));
 
 final currentUserProvider = StreamProvider<User?>((ref) {
   return EmailAuthService()

@@ -2,12 +2,13 @@ enum AttendanceStatus {
   present,
   absent,
   halfDay,
-  late,
+  leave,
+  weekOff
 }
 
 enum WorkType {
   office,
-  workFromHome,
+  anyLocation,
 }
 
 class AttendanceModel {
@@ -25,8 +26,8 @@ class AttendanceModel {
   final String officeLocationId;
   final WorkType workType;
   final AttendanceStatus status;
-  final double? totalHours;
-  final double? overtimeHours;
+  final int? totalHours;
+  final int? overtimeHours;
   final String? notes;
   final bool isRegularized;
   final String? regularizedBy;
@@ -60,12 +61,12 @@ class AttendanceModel {
       attendanceId: json['id'],
       userId: json['user_id'] ?? '',
       date:
-          json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
+          json['date'] != null ? DateTime.parse(json['date']).toLocal() : DateTime.now(),
       checkInTime: json['check_in_time'] != null
-          ? DateTime.parse(json['check_in_time'])
+          ? DateTime.parse(json['check_in_time']).toLocal()
           : null,
       checkOutTime: json['check_out_time'] != null
-          ? DateTime.parse(json['check_out_time'])
+          ? DateTime.parse(json['check_out_time']).toLocal()
           : null,
       checkInLat: json['check_in_latitude'],
       checkInLong: json['check_in_longitude'],
@@ -76,19 +77,17 @@ class AttendanceModel {
       officeLocationId: json['office_location_id'] ?? '',
       workType: WorkType.values.firstWhere(
         (e) => e.name == json['work_type'],
-        orElse: () => WorkType.office,
-      ),
+        orElse: () => WorkType.office),
       status: AttendanceStatus.values.firstWhere(
         (e) => e.name == json['status'],
-        orElse: () => AttendanceStatus.present,
-      ),
-      totalHours: json['total_hours']?.toDouble(),
-      overtimeHours: json['overtime_hours']?.toDouble(),
+        orElse: () => AttendanceStatus.present),
+      totalHours: json['total_hours']?.toInt(),
+      overtimeHours: json['overtime_hours']?.toInt(),
       notes: json['notes'],
       isRegularized: json['is_regularized'] ?? false,
       regularizedBy: json['regularized_by'],
       regularizedAt: json['regularized_at'] != null
-          ? DateTime.parse(json['regularized_at'])
+          ? DateTime.parse(json['regularized_at']).toLocal()
           : null,
     );
   }
@@ -97,9 +96,9 @@ class AttendanceModel {
     return {
       if (attendanceId != null) 'id': attendanceId,
       'user_id': userId,
-      'date': date.toIso8601String(),
-      'check_in_time': checkInTime?.toIso8601String(),
-      'check_out_time': checkOutTime?.toIso8601String(),
+      'date': date?.toUtc().toIso8601String(),
+      'check_in_time': checkInTime?.toUtc().toIso8601String(),
+      'check_out_time': checkOutTime?.toUtc().toIso8601String(),
       'check_in_latitude': checkInLat,
       'check_in_longitude': checkInLong,
       'check_out_latitude': checkOutLat,
@@ -114,7 +113,7 @@ class AttendanceModel {
       'notes': notes,
       'is_regularized': isRegularized,
       'regularized_by': regularizedBy,
-      'regularized_at': regularizedAt?.toIso8601String(),
+      'regularized_at': regularizedAt?.toUtc().toIso8601String(),
     };
   }
 
@@ -133,8 +132,8 @@ class AttendanceModel {
     String? officeLocationId,
     WorkType? workType,
     AttendanceStatus? status,
-    double? totalHours,
-    double? overtimeHours,
+    int? totalHours,
+    int? overtimeHours,
     String? notes,
     bool? isRegularized,
     String? regularizedBy,

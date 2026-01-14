@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import '../../../../app.dart';
 
 class BottomWidget extends ConsumerWidget {
@@ -7,12 +6,9 @@ class BottomWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final onboardingState = ref.watch(onboardingProvider);
-    final onboardingNotifier = ref.watch(onboardingProvider.notifier);
     final bottomPadding = ScreenUtil().bottomBarHeight + 32.w;
 
     return CustomContainer(
-        color: AppColor.white,
         padding: EdgeInsets.only(
             left: 16.w, top: 32.w, right: 16.w, bottom: bottomPadding),
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
@@ -20,23 +16,24 @@ class BottomWidget extends ConsumerWidget {
         offset: Offset(0, -8),
         blurRadius: 10.0,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _buildTextArea(onboardingState, onboardingNotifier),
+          _buildTextArea(ref),
           SizedBox(height: 32.w),
           _buildButtonArea(context, ref)
         ]));
   }
 
-  Widget _buildTextArea(
-      OnboardingState onboardingState, OnboardingNotifier onboardingNotifier) {
+  Widget _buildTextArea(WidgetRef ref) {
+    final onboardingState = ref.watch(onboardingProvider);
+    final onboardingNotifier = ref.watch(onboardingProvider.notifier);
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       _buildTitle("Email Address"),
       CustomTextField(
-        controller: onboardingState.emailController,
-        filled: true,
-        hintText: "Email123@gmail.com",
-        keyboardType: TextInputType.emailAddress,
-        errorText: onboardingState.emailErrorText,
-      ),
+          controller: onboardingState.emailController,
+          filled: true,
+          hintText: "Email123@gmail.com",
+          keyboardType: TextInputType.emailAddress,
+          errorText: onboardingState.emailErrorText),
       SizedBox(height: 16.w),
       _buildTitle("Password"),
       CustomTextField(
@@ -54,17 +51,9 @@ class BottomWidget extends ConsumerWidget {
               .paddingAll(4.w),
           errorText: onboardingState.passwordErrorText),
       (onboardingState.isSignIn)
-          ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(children: [
-                Checkbox(
-                    value: onboardingState.rememberMe,
-                    onChanged: (_) => onboardingNotifier.toggleRememberMe(),
-                    activeColor: AppColor.blue_1,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                _buildCondition("Remember me")
-              ]),
-              _buildCondition("Forgot Password?")
-            ])
+          ? Align(
+              alignment: Alignment.centerRight,
+              child: _buildCondition("Forgot Password?"))
           : Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,19 +61,11 @@ class BottomWidget extends ConsumerWidget {
                   SizedBox(height: 16.w),
                   _buildTitle("Confirm Password"),
                   CustomTextField(
-                    controller: onboardingState.confirmPasswordController,
-                    filled: true,
-                    hintText: "xxxxxxxxxxxx",
-                    obscureText: !onboardingState.isPasswordVisible,
-                    errorText: onboardingState.confirmPasswordErrorText,
-                  ),
-                  SizedBox(height: 16.w),
-                  _buildTitle("Full Name"),
-                  CustomTextField(
-                      controller: onboardingState.nameController,
+                      controller: onboardingState.confirmPasswordController,
                       filled: true,
-                      hintText: "WorkRamp",
-                      errorText: onboardingState.nameErrorText)
+                      hintText: "xxxxxxxxxxxx",
+                      obscureText: !onboardingState.isPasswordVisible,
+                      errorText: onboardingState.confirmPasswordErrorText)
                 ])
     ]);
   }
@@ -127,24 +108,25 @@ class BottomWidget extends ConsumerWidget {
         : Column(
             children: [
               CustomButton(
-                backgroundColor: AppColor.blue_1,
-                borderRadius: 12.r,
-                height: 50.w,
-                child: CustomText(
-                    text: onboardingState.isSignIn ? "Sign in" : "Sign up",
-                    color: AppColor.white,
-                    weight: FontWeight.w600),
-                onPressed: () async {
-                  log("Onboarding Button Clicked");
-                  await onboardingNotifier.handleSubmit(ref);
-                  log("Onboarding Process Complete");
-                },
-              ),
+                  backgroundColor: AppColor.blue_1,
+                  borderRadius: 12.r,
+                  height: 50.w,
+                  child: CustomText(
+                      text: onboardingState.isSignIn ? "Sign in" : "Sign up",
+                      color: AppColor.white,
+                      weight: FontWeight.w600),
+                  onPressed: () async =>
+                      await onboardingNotifier.handleSubmit(ref)),
               SizedBox(height: 16.w),
               // Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              //   _buildCondition("Cookie Policy"),
-              //   _buildCondition("Terms of Use"),
-              //   _buildCondition("Privacy Policy")
+              //   _buildCondition("Cookie Policy",
+              //       event: () => context.push('/privacy_policy')),
+              //   _buildCondition("Terms of Use",
+              //       event: () => context.push('/terms')),
+              //   _buildCondition("Privacy Policy", event: () {
+              //     log("Privacy Policy");
+              //     context.push('/privacy_policy');
+              //   })
               // ]),
               // SizedBox(height: 32.w),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [

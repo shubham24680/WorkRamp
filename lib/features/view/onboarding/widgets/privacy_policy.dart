@@ -46,7 +46,7 @@ class PrivacyPolicy extends StatelessWidget {
             h1("🔒 Introduction"),
             const SizedBox(height: 5),
             h3(
-              "Welcome to TickIt! Your privacy is of utmost importance to us. "
+              "Welcome to WorkRamp! Your privacy is of utmost importance to us. "
               "This Privacy Policy outlines how we collect, use, and safeguard "
               "your information when you use our app. By accessing or using TickIt, "
               "you agree to the terms outlined in this policy.",

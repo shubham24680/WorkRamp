@@ -7,11 +7,6 @@ final attendanceServiceProvider = Provider<AttendanceService>((ref) {
   return AttendanceService();
 });
 
-// Office Location Service Provider
-final officeLocationServiceProvider = Provider<OfficeLocationService>((ref) {
-  return OfficeLocationService();
-});
-
 // Today's Attendance Provider
 final todayAttendanceProvider = FutureProvider<AttendanceModel?>((ref) async {
   final userId = ref.watch(profileProvider).value?.userId;
@@ -26,8 +21,7 @@ final todayAttendanceProvider = FutureProvider<AttendanceModel?>((ref) async {
 // User's Assigned Office Location Provider
 final userOfficeLocationProvider =
     FutureProvider.family<OfficeLocation?, String>((ref, locationId) async {
-  final service = ref.watch(officeLocationServiceProvider);
-  return await service.getOfficeLocationById(locationId);
+  return await OfficeLocationService().getOfficeLocation(locationId);
 });
 
 // Attendance History Provider
@@ -42,8 +36,12 @@ final monthlyAttendanceSummaryProvider =
     FutureProvider.family<AttendanceSummary, MonthYearUserId>(
         (ref, params) async {
   final service = ref.watch(attendanceServiceProvider);
+  final userId = ref.watch(profileProvider).value?.userId;
+  if (userId == null) throw Exception;
+
+  log("Monthly Attendance Summary Provider - $userId");
   return await service.getMonthlyAttendanceSummary(
-    userId: params.userId,
+    userId: userId,
     year: params.year,
     month: params.month,
   );
@@ -51,12 +49,10 @@ final monthlyAttendanceSummaryProvider =
 
 // Helper class for monthly summary parameters
 class MonthYearUserId {
-  final String userId;
   final int year;
   final int month;
 
   MonthYearUserId({
-    required this.userId,
     required this.year,
     required this.month,
   });
@@ -66,12 +62,11 @@ class MonthYearUserId {
       identical(this, other) ||
       other is MonthYearUserId &&
           runtimeType == other.runtimeType &&
-          userId == other.userId &&
           year == other.year &&
           month == other.month;
 
   @override
-  int get hashCode => userId.hashCode ^ year.hashCode ^ month.hashCode;
+  int get hashCode => year.hashCode ^ month.hashCode;
 }
 
 // Attendance State Notifier
@@ -80,35 +75,35 @@ class AttendanceState {
   final String? errorMessage;
   final String? successMessage;
   final AttendanceModel? currentAttendance;
+  final WorkType workType;
 
   AttendanceState({
     this.isLoading = false,
     this.errorMessage,
     this.successMessage,
     this.currentAttendance,
+    this.workType = WorkType.office,
   });
 
-  AttendanceState copyWith({
-    bool? isLoading,
-    String? errorMessage,
-    String? successMessage,
-    AttendanceModel? currentAttendance,
-  }) {
+  AttendanceState copyWith(
+      {bool? isLoading,
+      String? errorMessage,
+      String? successMessage,
+      AttendanceModel? currentAttendance,
+      WorkType? workType}) {
     return AttendanceState(
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
-      successMessage: successMessage,
-      currentAttendance: currentAttendance ?? this.currentAttendance,
-    );
+        isLoading: isLoading ?? this.isLoading,
+        errorMessage: errorMessage,
+        successMessage: successMessage,
+        currentAttendance: currentAttendance ?? this.currentAttendance,
+        workType: workType ?? this.workType);
   }
 }
 
 class AttendanceNotifier extends StateNotifier<AttendanceState> {
   final AttendanceService _attendanceService;
-  final OfficeLocationService _officeLocationService;
 
-  AttendanceNotifier(this._attendanceService, this._officeLocationService)
-      : super(AttendanceState());
+  AttendanceNotifier(this._attendanceService) : super(AttendanceState());
 
   Future<void> checkIn({
     required UserModel user,
@@ -118,8 +113,8 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
         isLoading: true, errorMessage: null, successMessage: null);
 
     try {
-      final officeLocation = await _officeLocationService
-          .getOfficeLocationById(user.officeLocationId);
+      final officeLocation = await OfficeLocationService()
+          .getOfficeLocation(user.officeLocationId);
 
       if (officeLocation == null) {
         state = state.copyWith(
@@ -148,9 +143,8 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       }
     } catch (e) {
       state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Failed to check in: ${e.toString()}',
-      );
+          isLoading: false,
+          errorMessage: e.toString().replaceAll("Exception:", ""));
     }
   }
 
@@ -162,10 +156,19 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
         isLoading: true, errorMessage: null, successMessage: null);
 
     try {
+      final officeLocation = await OfficeLocationService()
+          .getOfficeLocation(user.officeLocationId);
+
+      if (officeLocation == null) {
+        state = state.copyWith(
+            isLoading: false, errorMessage: 'Office location not found');
+        return;
+      }
+
       final result = await _attendanceService.checkOut(
-        user: user,
-        todayAttendance: todayAttendance,
-      );
+          user: user,
+          officeLocation: officeLocation,
+          todayAttendance: todayAttendance);
 
       if (result.success) {
         state = state.copyWith(
@@ -182,22 +185,18 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Failed to check out: ${e.toString()}',
+        errorMessage: e.toString().replaceAll("Exception:", ""),
       );
     }
   }
 
-  void clearMessages() {
-    state = state.copyWith(
-      errorMessage: null,
-      successMessage: null,
-    );
+  void setWorkType(WorkType workType) {
+    state = state.copyWith(workType: workType);
   }
 }
 
 final attendanceNotifierProvider =
     StateNotifierProvider<AttendanceNotifier, AttendanceState>((ref) {
   final attendanceService = ref.watch(attendanceServiceProvider);
-  final officeLocationService = ref.watch(officeLocationServiceProvider);
-  return AttendanceNotifier(attendanceService, officeLocationService);
+  return AttendanceNotifier(attendanceService);
 });

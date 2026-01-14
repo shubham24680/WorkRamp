@@ -4,7 +4,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
       url: ApiConstants.URL, anonKey: ApiConstants.ANON_KEY);
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(ProviderScope(
+      observers: [CustomProviderObservers()], child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
@@ -13,16 +14,13 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routes = ref.watch(routesProvider);
-    final key = ref.watch(keyProvider);
 
-    return ProviderScope(
-        key: ValueKey(key),
-        child: ScreenUtilInit(
-            child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          theme: light,
-          routerConfig: routes,
-        )));
+    return ScreenUtilInit(
+        child: MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      theme: light,
+      routerConfig: routes,
+    ));
   }
 }
 
