@@ -2,8 +2,7 @@
 **WorkRamp Attendance** is a modern, scalable attendance management application built with Flutter, designed to help organizations efficiently track employee attendance, working hours, and availability in real time. The app prioritizes reliability, simplicity, and cross-platform accessibility with secure backend integration.
  
 ## 📋 About WorkRamp
-WorkRamp Attendance simplifies workforce attendance management by providing:
-- ⏱️ Real-time attendance tracking
+WorkRamp Attendance simplifies workforce attendance management by providing:⏱️ Real-time attendance tracking
 - 📅 Daily, weekly, and monthly attendance records
 - 🏢 Employee profile & role-based access
 - 🔄 Instant data sync across devices
@@ -16,13 +15,13 @@ WorkRamp Attendance simplifies workforce attendance management by providing:
 - 🎨 **Dribbble** – Design and UI Prototyping.
 
 ## ⚡️ Features
-✅ Secure Authentication (Email / Google Sign-In)
-✅ Real-Time Attendance Sync (No Data Loss)
-✅ Check-In / Check-Out System
-✅ Attendance History with Calendar View
-✅ Employee Profile & Avatar Customization
-✅ Multi-Platform Support (Android, iOS, Web)
-✅ MVVM architecture with Riverpod State Management
+✅ Secure Authentication (Email / Google Sign-In)\
+✅ Real-Time Attendance Sync (No Data Loss)\
+✅ Check-In / Check-Out System\
+✅ Attendance History with Calendar View\
+✅ Employee Profile & Avatar Customization\
+✅ Multi-Platform Support (Android, iOS, Web)\
+✅ MVVM architecture with Riverpod State Management\
 ✅ Fast & Responsive UI 
 
 ## 🛠 Installation & Setup
