@@ -1,29 +1,29 @@
-# 🎯 TickIt
-TickIt is a **minimalist task management** application built with **Flutter** that helps users stay focused on tasks, manage priorities, and boost productivity. It provides seamless access across multiple platforms with real-time sync using Supabase.
+# 🎯 WorkRamp
+**WorkRamp Attendance** is a modern, scalable attendance management application built with Flutter, designed to help organizations efficiently track employee attendance, working hours, and availability in real time. The app prioritizes reliability, simplicity, and cross-platform accessibility with secure backend integration.
  
-## 📋 About TickIt
-TickIt is designed to simplify task management by providing:
-- 📆 Calendar integration for tracking deadlines.
-- 🏷️ Task categorization with priority and tags.
-- 🔥 Real-time task updates across multiple devices.
-- 🖼️ Avatar selection for personalized profiles.
-- 💡 Fast, responsive, and intuitive user interface.
+## 📋 About WorkRamp
+WorkRamp Attendance simplifies workforce attendance management by providing:
+- ⏱️ Real-time attendance tracking
+- 📅 Daily, weekly, and monthly attendance records
+- 🏢 Employee profile & role-based access
+- 🔄 Instant data sync across devices
+- 📱 Fast, clean, and intuitive UI
 
 ## 🚀 Tech Stack
 - 🎯 **Flutter** – Frontend and UI.
 - 🔐 **Supabase** – Authentication and PostgreSQL Database.
-- 📦 **Provider** – State management.
-- 🎨 **Figma** – Design and UI Prototyping.
+- 📦 **Riverpod** – State management.
+- 🎨 **Dribbble** – Design and UI Prototyping.
 
 ## ⚡️ Features
-✅ **No Data Loss** with Supabase Real-Time Sync  
-✅ Search, Update, and Delete Tasks  
-✅ **Built-in Calendar** for Task Tracking  
-✅ Task **Tags** with Custom **Priorities**  
-✅ **Google Authentication** for Secure Sign-In  
-✅ **Avatar Customization** for Profiles  
-✅ **Access Anytime, Anywhere** with Multi-Platform Support  
-✅ State Management Using **Provider** 
+✅ Secure Authentication (Email / Google Sign-In)
+✅ Real-Time Attendance Sync (No Data Loss)
+✅ Check-In / Check-Out System
+✅ Attendance History with Calendar View
+✅ Employee Profile & Avatar Customization
+✅ Multi-Platform Support (Android, iOS, Web)
+✅ MVVM architecture with Riverpod State Management
+✅ Fast & Responsive UI 
 
 ## 🛠 Installation & Setup
 🔹**Prerequisites**
@@ -34,8 +34,8 @@ Before running the app, make sure you have the following installed:
 
 🔹**Clone the Repository**
 ```sh
-git clone https://github.com/your-username/TickIt.git
-cd TickIt
+git clone https://github.com/shubham24680/WorkRamp.git
+cd WorkRamp
 ```
 🔹**Install Dependencies**
 ```sh
@@ -47,24 +47,10 @@ flutter run
 ```
 
 ## 🖼 Screenshots
-<p align="center">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/onboarding.jpg" alt="Onboarding Screen" width="250">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/home.jpg" alt="Home Screen" width="250">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/edit.jpg" alt="Edit Screen" width="250">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/tasks.jpg" alt="Task Screen" width="250">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/profile.jpg" alt="Profile Screen" width="250">
- <img src="https://github.com/shubham24680/TickIt/blob/main/assets/images/avatars.jpg" alt="Avatar Screen" width="250">
-</p>
-
-## 🔥 Upcoming Features
-- 🔔 Push Notifications for Task Reminders
-- 📊 Task Analytics and Insights
-- 🌙 Dark Mode Support
-- 📤 Share Tasks with Team Members
 
 ## 🤝 Contributing
 Contributions are welcome! ❤️\
-If you would like to contribute to TickIt, follow these steps:
+If you would like to contribute to WorkRamp, follow these steps:
 1. Fork the repository.
 2. Create a new branch.
 3. Commit your changes.
