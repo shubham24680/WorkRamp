@@ -15,6 +15,7 @@ final appRoutes = [
   AppRoute(path: "/terms", widget: Terms()),
   AppRoute(path: "/privacy_policy", widget: PrivacyPolicy()),
   AppRoute(path: "/", widget: AttendanceScreen()),
+  AppRoute(path: "/total_attendance", widget: TotalAttendanceScreen()),
   AppRoute(path: "/admin_dashboard", widget: AdminDashboardScreen()),
   AppRoute(path: "/hr_dashboard", widget: HrDashboardScreen()),
   AppRoute(path: "/manager_dashboard", widget: ManagerDashboardScreen()),

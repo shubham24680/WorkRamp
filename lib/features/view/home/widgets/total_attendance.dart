@@ -24,15 +24,16 @@ class TotalAttendance extends ConsumerWidget {
             TotalAttendanceModel(
                 value: attendance.halfDays, name: "Half", color: Colors.orange),
             TotalAttendanceModel(value: 0, name: "Late", color: Colors.blue),
-            TotalAttendanceModel(
-                value: 13, name: "Leave", color: Colors.purple),
+            TotalAttendanceModel(value: 0, name: "Leave", color: Colors.purple),
           ];
 
           return Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildTitle("Total Attendance", subtitle: "(Days)"),
+                buildTitle("Total Attendance",
+                    subtitle: "(Days)",
+                    event: () => context.push("/total_attendance")),
                 CustomContainer(
                     color: Colors.white,
                     margin:
@@ -51,6 +52,11 @@ class TotalAttendance extends ConsumerWidget {
                             crossAxisSpacing: 8.w,
                             childAspectRatio: 1.25),
                         itemBuilder: (context, index) {
+                          final total = totalAttendance[index]
+                              .value
+                              .toString()
+                              .padLeft(2, "0");
+
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -60,10 +66,7 @@ class TotalAttendance extends ConsumerWidget {
                                       vertical: 4.w, horizontal: 8.w),
                                   borderRadius: BorderRadius.circular(8.r),
                                   child: CustomText(
-                                      text: totalAttendance[index]
-                                          .value
-                                          .toString()
-                                          .padLeft(2, "0"),
+                                      text: total,
                                       color:
                                           totalAttendance[index].color.shade700,
                                       weight: FontWeight.w600,

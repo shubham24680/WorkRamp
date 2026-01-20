@@ -1,14 +1,21 @@
 enum AttendanceStatus {
-  present,
-  absent,
-  halfDay,
-  leave,
-  weekOff
+  present("Present"),
+  absent("Absent"),
+  halfDay("Half Day"),
+  leave("Leave"),
+  weekOff("Week Off");
+
+  final String value;
+  const AttendanceStatus(this.value);
 }
 
 enum WorkType {
-  office,
-  anyLocation,
+  office("Office"),
+  workFromHome("WFH"),
+  inField("In Field");
+
+  final String value;
+  const WorkType(this.value);
 }
 
 class AttendanceModel {
@@ -60,8 +67,9 @@ class AttendanceModel {
     return AttendanceModel(
       attendanceId: json['id'],
       userId: json['user_id'] ?? '',
-      date:
-          json['date'] != null ? DateTime.parse(json['date']).toLocal() : DateTime.now(),
+      date: json['date'] != null
+          ? DateTime.parse(json['date']).toLocal()
+          : DateTime.now(),
       checkInTime: json['check_in_time'] != null
           ? DateTime.parse(json['check_in_time']).toLocal()
           : null,
@@ -75,12 +83,11 @@ class AttendanceModel {
       checkInAddress: json['check_in_address'],
       checkOutAddress: json['check_out_address'],
       officeLocationId: json['office_location_id'] ?? '',
-      workType: WorkType.values.firstWhere(
-        (e) => e.name == json['work_type'],
-        orElse: () => WorkType.office),
+      workType: WorkType.values.firstWhere((e) => e.name == json['work_type'],
+          orElse: () => WorkType.office),
       status: AttendanceStatus.values.firstWhere(
-        (e) => e.name == json['status'],
-        orElse: () => AttendanceStatus.present),
+          (e) => e.name == json['status'],
+          orElse: () => AttendanceStatus.present),
       totalHours: json['total_hours']?.toInt(),
       overtimeHours: json['overtime_hours']?.toInt(),
       notes: json['notes'],

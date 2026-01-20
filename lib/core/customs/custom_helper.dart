@@ -44,8 +44,9 @@ String formatWorkHours(dynamic totalHours, {bool clockFormat = false}) {
 
 // BUILD TITLE
 Widget buildTitle(String title, {String? subtitle, void Function()? event}) {
-  return Row(mainAxisSize: MainAxisSize.min, children: [
-    CustomText(text: title, weight: FontWeight.w600, size: 16.w),
+  return Row(mainAxisSize: MainAxisSize.min,
+      children: [
+    CustomText(text: title, weight: FontWeight.w600, color: Colors.grey.shade700),
     if (subtitle != null) ...[
       SizedBox(width: 4.w),
       CustomText(text: subtitle, color: Colors.grey.shade700)
@@ -58,7 +59,7 @@ Widget buildTitle(String title, {String? subtitle, void Function()? event}) {
           icon: AppSvgs.ARROW_RIGHT,
           forgroundColor: Colors.grey.shade700,
           onPressed: event)
-  ]).paddingSymmetric(horizontal: 16.w, vertical: 8.w);
+  ]).paddingSymmetric(horizontal: 24.w, vertical: 8.w);
 }
 
 AppBar customAppBar(BuildContext context, {String? title}) {
@@ -71,6 +72,7 @@ AppBar customAppBar(BuildContext context, {String? title}) {
         color: AppColor.white.withAlpha(200),
         onClick: () => context.pop(),
       ).paddingSymmetric(vertical: 8.w),
+      centerTitle: true,
       title: CustomText(
           text: title ?? "",
           weight: FontWeight.w600,

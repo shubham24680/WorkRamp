@@ -1,18 +1,6 @@
-enum UserRole {
-  admin,
-  hr,
-  manager,
-  employee,
-}
+enum UserRole { admin, hr, manager, employee }
 
-enum Department {
-  technology,
-  hr,
-  sales,
-  marketing,
-  finance,
-  operations,
-}
+enum Department { technology, hr, sales, marketing, finance, operations }
 
 class UserModel {
   final String userId;

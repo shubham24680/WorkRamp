@@ -6,10 +6,12 @@ export 'model/helper_model.dart';
 
 
 // VIEW
+export 'view/onboarding/screens/onboarding_screen.dart';
+export 'view/onboarding/widgets/bottom_widget.dart';
+export 'view/onboarding/widgets/privacy_policy.dart';
+export 'view/onboarding/widgets/terms.dart';
+
 export 'view/home/screens/attendance_screen.dart';
-export 'view/home/screens/admin_dashboard_screen.dart';
-export 'view/home/screens/hr_dashboard_screen.dart';
-export 'view/home/screens/manager_dashboard_screen.dart';
 export 'view/home/widgets/attendance_app_bar.dart';
 export 'view/home/widgets/total_attendance.dart';
 export 'view/home/widgets/dashboard.dart';
@@ -20,10 +22,11 @@ export 'view/search/screens/search_screens.dart';
 
 export 'view/check_in_or_out/screens/check_in_or_out_screen.dart';
 
-export 'view/onboarding/screens/onboarding_screen.dart';
-export 'view/onboarding/widgets/bottom_widget.dart';
-export 'view/onboarding/widgets/privacy_policy.dart';
-export 'view/onboarding/widgets/terms.dart';
+export 'view/total_attendance/screens/total_attendance_screen.dart';
+
+export 'view/dashboard/screens/admin_dashboard_screen.dart';
+export 'view/dashboard/screens/hr_dashboard_screen.dart';
+export 'view/dashboard/screens/manager_dashboard_screen.dart';
 
 export 'view/alert_screen.dart';
 

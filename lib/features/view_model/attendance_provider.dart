@@ -105,10 +105,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
 
   AttendanceNotifier(this._attendanceService) : super(AttendanceState());
 
-  Future<void> checkIn({
-    required UserModel user,
-    WorkType workType = WorkType.office,
-  }) async {
+  Future<void> checkIn({required UserModel user}) async {
     state = state.copyWith(
         isLoading: true, errorMessage: null, successMessage: null);
 
@@ -126,7 +123,7 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
       final result = await _attendanceService.checkIn(
         user: user,
         officeLocation: officeLocation,
-        workType: workType,
+        workType: state.workType,
       );
 
       if (result.success) {

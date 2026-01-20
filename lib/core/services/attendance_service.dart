@@ -17,7 +17,7 @@ class AttendanceService {
           .from('attendance')
           .select()
           .eq('user_id', userId)
-          .gte('date', startOfDay.toUtc().toIso8601String())
+          .gt('date', startOfDay.toUtc().toIso8601String())
           .maybeSingle();
 
       log("Today Attendance - $startOfDay, $endOfDay: $response");
@@ -260,16 +260,27 @@ class AttendanceService {
       int presentDays = 0;
       int absentDays = 0;
       int halfDays = 0;
+      int lateDays = 0;
+      int leaveDays = 0;
       int totalWorkHours = 0;
       int totalOvertimeHours = 0;
 
       for (var attendance in attendances) {
-        if (attendance.status == AttendanceStatus.present) {
-          presentDays++;
-        } else if (attendance.status == AttendanceStatus.absent) {
-          absentDays++;
-        } else if (attendance.status == AttendanceStatus.halfDay) {
-          halfDays++;
+        switch (attendance.status) {
+          case AttendanceStatus.present:
+            presentDays++;
+            break;
+          case AttendanceStatus.absent:
+            absentDays++;
+            break;
+          case AttendanceStatus.halfDay:
+            halfDays++;
+            break;
+          case AttendanceStatus.leave:
+            leaveDays++;
+            break;
+          default:
+            break;
         }
 
         final totalHours = attendance.totalHours;
@@ -282,7 +293,7 @@ class AttendanceService {
         }
       }
 
-      final totalDays = presentDays + halfDays + absentDays;
+      final totalDays = presentDays + halfDays;
       int? averageWorkHours;
       if (totalDays > 0) {
         averageWorkHours = totalWorkHours ~/ totalDays;

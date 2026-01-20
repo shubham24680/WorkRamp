@@ -9,7 +9,7 @@ class CustomButton extends StatelessWidget {
       {super.key,
       this.buttonType = ButtonType.ELEVATED,
       this.buttonNature = ButtonNature.UNBOUNDED,
-      this.blurValue = 3.0,
+      this.blurValue = 0,
       this.onPressed,
       this.borderRadius,
       this.backgroundColor,
@@ -55,13 +55,20 @@ class CustomButton extends StatelessWidget {
       case ButtonType.ICON:
         baseButton = IconButton(
             onPressed: onPressed,
-            padding: EdgeInsets.all(2.w),
-            constraints: buttonNature == ButtonNature.BOUNDED ? BoxConstraints() : null,
+            constraints: buttonNature == ButtonNature.BOUNDED
+                ? BoxConstraints()
+                : null,
             style: IconButton.styleFrom(
                 backgroundColor: widgetBackgroundColor,
-                fixedSize: (height != null) ? Size(height ?? 0, height ?? 0) : null,
-                shape: const CircleBorder()),
+                padding: EdgeInsets.all(2.w),
+                fixedSize: (height != null)
+                    ? Size(height ?? 0, height ?? 0)
+                    : null,
+                shape: const CircleBorder(),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             icon: SvgPicture.asset(icon ?? AppSvgs.SETTINGS,
+                height: height,
+                width: height,
                 colorFilter: ColorFilter.mode(
                     forgroundColor ?? AppColor.white.withAlpha(200),
                     BlendMode.srcIn)));

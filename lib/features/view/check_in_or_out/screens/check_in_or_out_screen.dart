@@ -67,21 +67,22 @@ class CheckInOrOutScreen extends ConsumerWidget {
         .paddingFromLTRB(bottom: 8.w);
   }
 
-  Widget _buildWorkTypeButton(
-      String label, WidgetRef ref, WorkType selectedWorkType) {
+  Widget _buildWorkTypeButton(WidgetRef ref, WorkType selectedWorkType) {
     final workType = ref.watch(attendanceNotifierProvider).workType;
     final attendanceNotifier = ref.watch(attendanceNotifierProvider.notifier);
     final isSelected = (workType == selectedWorkType);
 
     return CustomContainer(
         event: () => attendanceNotifier.setWorkType(selectedWorkType),
-        padding: EdgeInsets.all(8.w),
+        margin: EdgeInsets.symmetric(horizontal: 2.w),
+        padding: EdgeInsets.symmetric(vertical: 8.w),
         color: isSelected ? AppColor.blue_14 : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(6.r),
         child: CustomText(
-            text: label ?? "",
+            text: selectedWorkType.value,
             align: TextAlign.center,
             size: 10.w,
+            maxLines: 1,
             color: isSelected ? AppColor.blue_3 : Colors.grey.shade700,
             weight: FontWeight.bold));
   }
@@ -96,14 +97,17 @@ class CheckInOrOutScreen extends ConsumerWidget {
         blurRadius: 10.0,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _buildTitle("Work Type"),
-          Row(children: [
-            Expanded(
-                child: _buildWorkTypeButton('Office', ref, WorkType.office)),
-            SizedBox(width: 4.w),
-            Expanded(
-                child: _buildWorkTypeButton(
-                    'Any Location', ref, WorkType.anyLocation))
-          ])
+          Row(children: WorkType.values.map((w) => Expanded(
+              child: _buildWorkTypeButton(ref, w))).toList()
+          // [
+          //   Expanded(
+          //       child: _buildWorkTypeButton(ref, WorkType.office)),
+          //   SizedBox(width: 4.w),
+          //   Expanded(
+          //       child: _buildWorkTypeButton(
+          //           ref, WorkType.workFromHome))
+          // ]
+          )
         ]));
   }
 
@@ -159,7 +163,7 @@ class CheckInOrOutScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildTitle("Attendance status"),
-                          // if (overtime != null)
+                          if (overtime != null)
                             CustomChip(
                                 label: "Overtime: ${formatWorkHours(0)}",
                                 backgroundColor: Colors.orange.shade100,
@@ -178,6 +182,7 @@ class CheckInOrOutScreen extends ConsumerWidget {
   }
 
   Widget _buildOfficeLocation(UserModel user, WidgetRef ref) {
+    final workType = ref.watch(attendanceNotifierProvider).workType;
     final officeLocationAsync = ref.watch(locationProvider);
     final todayAttendance = ref.watch(todayAttendanceProvider).value;
     String? inAddress = todayAttendance?.checkInAddress;
@@ -203,7 +208,7 @@ class CheckInOrOutScreen extends ConsumerWidget {
                     weight: FontWeight.w600,
                     color: Colors.grey.shade700),
                 CustomChip(
-                    label: user.canCheckInAnywhere ? 'Any Location' : 'Office',
+                    label: workType.value,
                     backgroundColor: Colors.green.shade100,
                     textColor: Colors.green.shade700)
               ]),
