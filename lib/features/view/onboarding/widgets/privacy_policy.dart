@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:tickit/core/widgets/text.dart';
+import 'package:tickit/app.dart';
 
 class PrivacyPolicy extends StatelessWidget {
   const PrivacyPolicy({super.key});
 
   // Custom Header 1 (Main Title)
   Widget h1(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 22,
       weight: FontWeight.bold,
@@ -15,7 +15,7 @@ class PrivacyPolicy extends StatelessWidget {
 
   // Custom Header 2 (Section Title)
   Widget h2(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 16,
       weight: FontWeight.w600,
@@ -24,7 +24,7 @@ class PrivacyPolicy extends StatelessWidget {
 
   // Custom Header 3 (Body Text)
   Widget h3(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 14,
     );
@@ -34,7 +34,7 @@ class PrivacyPolicy extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Inter(text: "Privacy Policy"),
+        title: const CustomText(text: "Privacy Policy"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

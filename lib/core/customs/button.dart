@@ -38,32 +38,18 @@ class CustomButton extends StatelessWidget {
     final widgetBorderRadius = BorderRadius.circular(
         borderRadius ?? (buttonType == ButtonType.ICON ? 1.sh : 12.r));
 
-    Size? getSize() {
-      if (height != null && width != null) {
-        return Size(width ?? 0, height ?? 0);
-      } else if (height != null) {
-        return Size.fromHeight(height ?? 0);
-      } else if (width != null) {
-        return Size.fromWidth(width ?? 0);
-      }
-
-      return null;
-    }
-
     Widget baseButton;
     switch (buttonType) {
       case ButtonType.ICON:
         baseButton = IconButton(
             onPressed: onPressed,
-            constraints: buttonNature == ButtonNature.BOUNDED
-                ? BoxConstraints()
-                : null,
+            constraints:
+                buttonNature == ButtonNature.BOUNDED ? BoxConstraints() : null,
             style: IconButton.styleFrom(
                 backgroundColor: widgetBackgroundColor,
                 padding: EdgeInsets.all(2.w),
-                fixedSize: (height != null)
-                    ? Size(height ?? 0, height ?? 0)
-                    : null,
+                fixedSize:
+                    (height != null) ? Size(height ?? 0, height ?? 0) : null,
                 shape: const CircleBorder(),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             icon: SvgPicture.asset(icon ?? AppSvgs.SETTINGS,
@@ -78,8 +64,7 @@ class CustomButton extends StatelessWidget {
             onPressed: onPressed,
             style: ElevatedButton.styleFrom(
                 backgroundColor: widgetBackgroundColor,
-                minimumSize:
-                    buttonNature == ButtonNature.BOUNDED ? null : getSize(),
+                minimumSize: getSize(),
                 shape: RoundedRectangleBorder(
                     side: BorderSide(
                         color: onPressed == null
@@ -95,5 +80,17 @@ class CustomButton extends StatelessWidget {
       baseButton,
       borderRadius: widgetBorderRadius,
     );
+  }
+
+  Size? getSize() {
+    if (height != null && width != null) {
+      return Size(width ?? 0, height ?? 0);
+    } else if (height != null) {
+      return Size.fromHeight(height ?? 0);
+    } else if (width != null) {
+      return Size.fromWidth(width ?? 0);
+    }
+
+    return null;
   }
 }

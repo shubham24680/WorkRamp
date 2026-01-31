@@ -29,7 +29,9 @@ class CustomTextField extends StatelessWidget {
       this.perfixIcon,
       this.suffixIcon,
       this.obscureText = false,
-      this.validator});
+      this.validator,
+      this.maxLines,
+      this.enabled = true});
 
   final TextFieldType textFieldType;
   final TextEditingController? controller;
@@ -52,6 +54,8 @@ class CustomTextField extends StatelessWidget {
   final OnTap onTap;
   final bool obscureText;
   final Validator validator;
+  final int? maxLines;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +65,12 @@ class CustomTextField extends StatelessWidget {
         filled: filled,
         fillColor: fillColor ?? Colors.grey.shade700.withAlpha(20),
         labelText: labelText,
-        hintText: hintText,
-        errorText: errorText,
         labelStyle: buildHint(hintColor).getTextStyle(),
         floatingLabelStyle: buildHint(floatingHintColor).getTextStyle(),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        hintText: hintText,
         hintStyle: buildHint(hintColor).getTextStyle(),
+        errorText: errorText,
         errorStyle: buildHint(Colors.red.shade700, size: 10.w).getTextStyle(),
         prefixIcon: perfixIcon?.paddingAll(0.01.sh),
         suffixIcon: suffixIcon?.paddingAll(0.01.sh) ?? const SizedBox.shrink(),
@@ -77,7 +82,7 @@ class CustomTextField extends StatelessWidget {
 
     final dropDownMenu = items
         .map((value) => DropdownMenuItem(
-            value: value, child: buildHint(AppColor.white, text: value)))
+            value: value, child: buildHint(AppColor.black3, text: value)))
         .toList();
 
     Widget field;
@@ -88,10 +93,9 @@ class CustomTextField extends StatelessWidget {
             value: initialValue,
             onChanged: onChanged,
             decoration: decoration.copyWith(suffixIcon: suffixIcon),
-            style: buildHint(AppColor.white).getTextStyle(),
             hint: buildHint(hintColor, text: hintText),
-            dropdownColor: AppColor.blue_1,
-            borderRadius: BorderRadius.circular(0.015.sh));
+            dropdownColor: AppColor.white,
+            borderRadius: BorderRadius.circular(12.r));
         break;
       default:
         field = TextFormField(
@@ -107,6 +111,8 @@ class CustomTextField extends StatelessWidget {
           cursorColor: AppColor.blue_1,
           cursorErrorColor: Colors.red.shade700,
           validator: validator,
+          maxLines: maxLines ?? 1,
+          enabled: enabled,
         );
         break;
     }

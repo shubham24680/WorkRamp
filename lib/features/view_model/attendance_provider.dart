@@ -18,57 +18,6 @@ final todayAttendanceProvider = FutureProvider<AttendanceModel?>((ref) async {
   return await service.getTodayAttendance(userId);
 });
 
-// User's Assigned Office Location Provider
-final userOfficeLocationProvider =
-    FutureProvider.family<OfficeLocation?, String>((ref, locationId) async {
-  return await OfficeLocationService().getOfficeLocation(locationId);
-});
-
-// Attendance History Provider
-final attendanceHistoryProvider =
-    FutureProvider.family<List<AttendanceModel>, String>((ref, userId) async {
-  final service = ref.watch(attendanceServiceProvider);
-  return await service.getAttendanceHistory(userId: userId);
-});
-
-// Monthly Attendance Summary Provider
-final monthlyAttendanceSummaryProvider =
-    FutureProvider.family<AttendanceSummary, MonthYearUserId>(
-        (ref, params) async {
-  final service = ref.watch(attendanceServiceProvider);
-  final userId = ref.watch(profileProvider).value?.userId;
-  if (userId == null) throw Exception;
-
-  log("Monthly Attendance Summary Provider - $userId");
-  return await service.getMonthlyAttendanceSummary(
-    userId: userId,
-    year: params.year,
-    month: params.month,
-  );
-});
-
-// Helper class for monthly summary parameters
-class MonthYearUserId {
-  final int year;
-  final int month;
-
-  MonthYearUserId({
-    required this.year,
-    required this.month,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MonthYearUserId &&
-          runtimeType == other.runtimeType &&
-          year == other.year &&
-          month == other.month;
-
-  @override
-  int get hashCode => year.hashCode ^ month.hashCode;
-}
-
 // Attendance State Notifier
 class AttendanceState {
   final bool isLoading;
@@ -90,7 +39,8 @@ class AttendanceState {
       String? errorMessage,
       String? successMessage,
       AttendanceModel? currentAttendance,
-      WorkType? workType}) {
+      WorkType? workType,
+      bool? locationPermission}) {
     return AttendanceState(
         isLoading: isLoading ?? this.isLoading,
         errorMessage: errorMessage,
@@ -112,10 +62,11 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
     try {
       final officeLocation = await OfficeLocationService()
           .getOfficeLocation(user.officeLocationId);
+      final isLocationEnabled =
+          await LocationService().isLocationServiceEnabled();
 
-      if (officeLocation == null) {
-        state = state.copyWith(
-            isLoading: false, errorMessage: 'Office location not found');
+      if (!isLocationEnabled) {
+        state = state.copyWith(isLoading: false, errorMessage: 'location');
         return;
       }
 
@@ -155,10 +106,12 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
     try {
       final officeLocation = await OfficeLocationService()
           .getOfficeLocation(user.officeLocationId);
+      final isLocationEnabled =
+          await LocationService().isLocationServiceEnabled();
 
-      if (officeLocation == null) {
+      if (!isLocationEnabled) {
         state = state.copyWith(
-            isLoading: false, errorMessage: 'Office location not found');
+            isLoading: false, errorMessage: 'location');
         return;
       }
 
@@ -185,6 +138,10 @@ class AttendanceNotifier extends StateNotifier<AttendanceState> {
         errorMessage: e.toString().replaceAll("Exception:", ""),
       );
     }
+  }
+
+  Future<void> openLocationSettings() async {
+    await LocationService().openLocationSettings();
   }
 
   void setWorkType(WorkType workType) {

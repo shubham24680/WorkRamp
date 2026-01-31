@@ -1,9 +1,8 @@
 enum AttendanceStatus {
   present("Present"),
   absent("Absent"),
-  halfDay("Half Day"),
-  leave("Leave"),
-  weekOff("Week Off");
+  halfDay("Half"),
+  weekend("Weekend");
 
   final String value;
   const AttendanceStatus(this.value);
@@ -68,7 +67,7 @@ class AttendanceModel {
       attendanceId: json['id'],
       userId: json['user_id'] ?? '',
       date: json['date'] != null
-          ? DateTime.parse(json['date']).toLocal()
+          ? DateTime.parse(json['date'])
           : DateTime.now(),
       checkInTime: json['check_in_time'] != null
           ? DateTime.parse(json['check_in_time']).toLocal()
@@ -103,7 +102,7 @@ class AttendanceModel {
     return {
       if (attendanceId != null) 'id': attendanceId,
       'user_id': userId,
-      'date': date?.toUtc().toIso8601String(),
+      'date': date.toIso8601String(),
       'check_in_time': checkInTime?.toUtc().toIso8601String(),
       'check_out_time': checkOutTime?.toUtc().toIso8601String(),
       'check_in_latitude': checkInLat,

@@ -10,7 +10,7 @@ final profileProvider = FutureProvider<UserModel>((ref) async {
   return await UserService().getUserProfile(user.id);
 });
 
-final otherUserData =
+final userDataById =
     FutureProvider.family<UserModel, String>((ref, userId) async {
   return await UserService().getUserProfile(userId);
 });

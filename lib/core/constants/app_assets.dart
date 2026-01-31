@@ -7,18 +7,25 @@ class AppImages {
 // Icona Moon Bold UI Icons Collection
 class AppSvgs {
   static const AVATAR = "assets/avatars/settings.svg";
+  static const ADD = "assets/icons/add.svg";
   static const SEARCH = "assets/icons/search.svg";
   static const LOCATION = "assets/icons/location.svg";
   static const START_LOCATION = "assets/icons/start_location.svg";
   static const CLOCK = "assets/icons/clock.svg";
   static const ARROW_LEFT = "assets/icons/arrow_left.svg";
   static const ARROW_RIGHT = "assets/icons/arrow_right.svg";
+  static const ARROW_UP = "assets/icons/arrow_up.svg";
+  static const ARROW_DOWN = "assets/icons/arrow_down.svg";
   static const SETTINGS = "assets/icons/settings.svg";
   static const EYE_OPEN = "assets/icons/eye_open.svg";
   static const EYE_CLOSE = "assets/icons/eye_close.svg";
   static const OFFICE = "assets/icons/work.svg";
   static const CHECK_IN = "assets/icons/check_in.svg";
   static const CHECK_OUT = "assets/icons/check_out.svg";
+  static const CALENDAR = "assets/icons/calendar.svg";
+  static const LEAVE = "assets/icons/leave.svg";
+  static const CHECK = "assets/icons/check.svg";
+  static const CROSS = "assets/icons/cross.svg";
 }
 
 class AppLotties {

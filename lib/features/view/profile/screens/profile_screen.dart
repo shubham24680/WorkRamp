@@ -7,7 +7,6 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
 
-
     return Scaffold(
         body: profileState.when(
             data: (userData) => ListView(
@@ -73,17 +72,23 @@ class ProfileScreen extends ConsumerWidget {
         ]));
   }
 
-  Widget _buildProfile(BuildContext context, WidgetRef ref, UserModel userData) {
+  Widget _buildProfile(
+      BuildContext context, WidgetRef ref, UserModel userData) {
     final authState = ref.watch(authProvider);
     final authNotifier = ref.read(authProvider.notifier);
     final location = ref.watch(locationProvider).value?.address;
     final phone = userData.phone;
+    final managerUserId = userData.managerId;
+    final managerInfo = (managerUserId != null)
+        ? ref.watch(userDataById(managerUserId)).value?.name
+        : null;
     Map<String, String> data = {
       "Employee ID": userData.employeeId,
       "Email ID": userData.email,
       "Department": userData.department.name.toUpperCase(),
-      if(location != null) "Current Office Location": location,
-      if(phone != null) "Office Mobile Number": phone
+      if (location != null) "Current Office Location": location,
+      if (phone != null) "Office Mobile Number": phone,
+      if (managerInfo != null) "Manager": managerInfo
     };
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -133,6 +138,7 @@ class ProfileScreen extends ConsumerWidget {
             : CustomText(
                 text: "Sign out",
                 color: AppColor.white,
+                size: 16.w,
                 weight: FontWeight.w600),
       )
     ]).paddingAll(16.w);

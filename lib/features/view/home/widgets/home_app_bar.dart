@@ -168,7 +168,6 @@ class AttendanceAppBar extends ConsumerWidget {
                   buttonNature: ButtonNature.BOUNDED,
                   backgroundColor: backgroundColor,
                   borderRadius: 12.r,
-                  height: 50.w,
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     CustomImage(
                         imageType: ImageType.SVG_LOCAL,

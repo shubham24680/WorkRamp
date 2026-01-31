@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-import 'package:intl/intl.dart';
 import '../../../../app.dart';
 
 class CheckInOrOutScreen extends ConsumerWidget {
@@ -13,7 +11,7 @@ class CheckInOrOutScreen extends ConsumerWidget {
     final checkInTime = todayAttendanceAsync.value?.checkInTime;
 
     return Scaffold(
-      appBar: customAppBar(context, title: "Attendance"),
+      appBar: customAppBar(context, title: "Mark Attendance"),
       body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           padding: EdgeInsets.all(16.w),
@@ -31,7 +29,6 @@ class CheckInOrOutScreen extends ConsumerWidget {
       bottomNavigationBar: todayAttendanceAsync.when(
         data: (attendance) {
           if (attendance == null || attendance.checkInTime == null) {
-            // Not checked in yet
             return _buildCheckButton(
                 ref,
                 () => _handleCheckIn(ref, user, context),
@@ -40,7 +37,6 @@ class CheckInOrOutScreen extends ConsumerWidget {
                 'Check In',
                 'Tap to mark your attendance');
           } else if (attendance.checkOutTime == null) {
-            // Checked in, not checked out
             return _buildCheckButton(
                 ref,
                 () => _handleCheckOut(ref, attendance, user, context),
@@ -97,17 +93,19 @@ class CheckInOrOutScreen extends ConsumerWidget {
         blurRadius: 10.0,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _buildTitle("Work Type"),
-          Row(children: WorkType.values.map((w) => Expanded(
-              child: _buildWorkTypeButton(ref, w))).toList()
-          // [
-          //   Expanded(
-          //       child: _buildWorkTypeButton(ref, WorkType.office)),
-          //   SizedBox(width: 4.w),
-          //   Expanded(
-          //       child: _buildWorkTypeButton(
-          //           ref, WorkType.workFromHome))
-          // ]
-          )
+          Row(
+              children: WorkType.values
+                  .map((w) => Expanded(child: _buildWorkTypeButton(ref, w)))
+                  .toList()
+              // [
+              //   Expanded(
+              //       child: _buildWorkTypeButton(ref, WorkType.office)),
+              //   SizedBox(width: 4.w),
+              //   Expanded(
+              //       child: _buildWorkTypeButton(
+              //           ref, WorkType.workFromHome))
+              // ]
+              )
         ]));
   }
 
@@ -165,7 +163,7 @@ class CheckInOrOutScreen extends ConsumerWidget {
                           _buildTitle("Attendance status"),
                           if (overtime != null)
                             CustomChip(
-                                label: "Overtime: ${formatWorkHours(0)}",
+                                label: "Overtime: ${formatWorkHours(overtime)}",
                                 backgroundColor: Colors.orange.shade100,
                                 textColor: Colors.orange.shade700)
                         ]),
@@ -258,6 +256,8 @@ class CheckInOrOutScreen extends ConsumerWidget {
   void listenInOrOut(WidgetRef ref, BuildContext context) {
     if (context.mounted) {
       final attendanceState = ref.read(attendanceNotifierProvider);
+      final attendanceNotifier = ref.read(attendanceNotifierProvider.notifier);
+      final error = attendanceState.errorMessage;
 
       if (attendanceState.successMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -269,13 +269,26 @@ class CheckInOrOutScreen extends ConsumerWidget {
         // Refresh today's attendance
         ref.invalidate(todayAttendanceProvider);
         ref.invalidate(monthlyAttendanceSummaryProvider);
-      } else if (attendanceState.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomText(text: attendanceState.errorMessage ?? ""),
-            backgroundColor: Colors.red,
-          ),
-        );
+      } else if (error != null) {
+        if (error.toLowerCase() == "location") {
+          customDialog(context,
+              icon: AppSvgs.LOCATION,
+              title: "Turn On Location",
+              subTitle:
+                  "To proceed with attendance, please enable location services.",
+              buttonText: "Cancel",
+              buttonText2: "Settings", onPressed2: () {
+            attendanceNotifier.openLocationSettings();
+            context.pop();
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: CustomText(text: attendanceState.errorMessage ?? ""),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -296,17 +309,17 @@ class CheckInOrOutScreen extends ConsumerWidget {
                   CustomImage(
                       imageType: ImageType.SVG_LOCAL,
                       imageUrl: icon,
-                      height: 24.w,
+                      height: 20.w,
                       color: Colors.white),
                   SizedBox(width: 8.w),
                   CustomText(
                       text: label,
                       color: Colors.white,
-                      size: 20.w,
+                      size: 16.w,
                       weight: FontWeight.w600)
                 ])),
       SizedBox(height: 4.w),
       CustomText(text: hint, color: Colors.grey.shade700, size: 8.w)
-    ]).paddingSymmetric(horizontal: 16.w, vertical: 16.w);
+    ]).paddingAll(16.w);
   }
 }

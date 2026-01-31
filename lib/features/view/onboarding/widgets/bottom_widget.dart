@@ -114,6 +114,7 @@ class BottomWidget extends ConsumerWidget {
                   child: CustomText(
                       text: onboardingState.isSignIn ? "Sign in" : "Sign up",
                       color: AppColor.white,
+                      size: 16.w,
                       weight: FontWeight.w600),
                   onPressed: () async =>
                       await onboardingNotifier.handleSubmit(ref)),

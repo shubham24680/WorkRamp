@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:tickit/core/widgets/text.dart';
+
+
+import '../../../../app.dart';
 
 class Terms extends StatelessWidget {
   const Terms({super.key});
 
   // Custom Header 1 (Main Title)
   Widget h1(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 22,
       weight: FontWeight.bold,
@@ -15,7 +16,7 @@ class Terms extends StatelessWidget {
 
   // Custom Header 2 (Section Title)
   Widget h2(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 16,
       weight: FontWeight.w600,
@@ -24,7 +25,7 @@ class Terms extends StatelessWidget {
 
   // Custom Header 3 (Body Text)
   Widget h3(String text) {
-    return Inter(
+    return CustomText(
       text: text,
       size: 14,
     );
@@ -34,7 +35,7 @@ class Terms extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Inter(text: "Terms of Service"),
+        title: CustomText(text: "Terms of Service"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

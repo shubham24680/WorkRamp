@@ -17,7 +17,7 @@ class AttendanceService {
           .from('attendance')
           .select()
           .eq('user_id', userId)
-          .gt('date', startOfDay.toUtc().toIso8601String())
+          .gte('date', startOfDay.toIso8601String())
           .maybeSingle();
 
       log("Today Attendance - $startOfDay, $endOfDay: $response");
@@ -222,16 +222,16 @@ class AttendanceService {
     required String userId,
     DateTime? startDate,
     DateTime? endDate,
-    int limit = 30,
+    int limit = 31,
   }) async {
     try {
       var query = _supabase.from('attendance').select().eq('user_id', userId);
 
       if (startDate != null) {
-        query = query.gte('date', startDate.toUtc().toIso8601String());
+        query = query.gte('date', startDate.toIso8601String());
       }
       if (endDate != null) {
-        query = query.lte('date', endDate.toUtc().toIso8601String());
+        query = query.lte('date', endDate.toIso8601String());
       }
 
       final response = await query.order('date', ascending: false).limit(limit);
@@ -250,82 +250,186 @@ class AttendanceService {
     required int year,
     required int month,
   }) async {
-    try {
-      final startDate = DateTime(year, month, 1);
-      final endDate = DateTime(year, month + 1, 0);
+    final now = DateTime.now();
+    final startDate = DateTime(year, month, 1);
+    final lastDayOfMonth = DateTime(year, month + 1, 0);
+    final endDate = lastDayOfMonth.isAfter(now) ? now : lastDayOfMonth;
 
-      final attendances = await getAttendanceHistory(
-          userId: userId, startDate: startDate, endDate: endDate, limit: 31);
+    final attendances = await getAttendanceHistory(
+        userId: userId, startDate: startDate, endDate: endDate);
+    final attendanceMap = {
+      for (final a in attendances) _normalizeDate(a.date): a,
+    };
 
-      int presentDays = 0;
-      int absentDays = 0;
-      int halfDays = 0;
-      int lateDays = 0;
-      int leaveDays = 0;
-      int totalWorkHours = 0;
-      int totalOvertimeHours = 0;
+    for (final a in attendances) log("ATTENDANCE - ${a.date}");
 
-      for (var attendance in attendances) {
-        switch (attendance.status) {
-          case AttendanceStatus.present:
-            presentDays++;
-            break;
-          case AttendanceStatus.absent:
-            absentDays++;
-            break;
-          case AttendanceStatus.halfDay:
-            halfDays++;
-            break;
-          case AttendanceStatus.leave:
-            leaveDays++;
-            break;
-          default:
-            break;
-        }
+    final List<AttendanceModel> dailyAttendances = [];
+    DateTime currentDate = startDate;
+    while (!currentDate.isAfter(endDate)) {
+      final normalizedDate = _normalizeDate(currentDate);
+      final isWeekend = currentDate.weekday == DateTime.saturday ||
+          currentDate.weekday == DateTime.sunday;
 
-        final totalHours = attendance.totalHours;
-        final overtimeTotalHours = attendance.overtimeHours;
-        if (totalHours != null) {
-          totalWorkHours += totalHours;
-        }
-        if (overtimeTotalHours != null) {
-          totalOvertimeHours += overtimeTotalHours;
-        }
-      }
-
-      final totalDays = presentDays + halfDays;
-      int? averageWorkHours;
-      if (totalDays > 0) {
-        averageWorkHours = totalWorkHours ~/ totalDays;
-      }
-
-      return AttendanceSummary(
-        month: month,
-        year: year,
-        presentDays: presentDays,
-        absentDays: absentDays,
-        halfDays: halfDays,
-        totalWorkHours: totalWorkHours,
-        totalOvertimeHours: totalOvertimeHours,
-        averageWorkHours: averageWorkHours ?? 0,
-        attendances: attendances,
-      );
-    } catch (e) {
-      print('Error getting monthly summary: $e');
-      return AttendanceSummary(
-        month: month,
-        year: year,
-        presentDays: 0,
-        absentDays: 0,
-        lateDays: 0,
-        halfDays: 0,
-        totalWorkHours: 0,
-        totalOvertimeHours: 0,
-        averageWorkHours: 0,
-        attendances: [],
-      );
+      final attendance = attendanceMap[normalizedDate] ??
+          AttendanceModel(
+            date: currentDate,
+            checkInTime: null,
+            checkOutTime: null,
+            userId: userId,
+            officeLocationId: attendances.first.officeLocationId,
+            workType: WorkType.office,
+            status:
+                isWeekend ? AttendanceStatus.weekend : AttendanceStatus.absent,
+          );
+      dailyAttendances.add(attendance);
+      currentDate = currentDate.add(Duration(days: 1));
     }
+
+    int presentDays = 0;
+    int absentDays = 0;
+    int halfDays = 0;
+    int totalWorkHours = 0;
+    int totalOvertimeHours = 0;
+
+    for (final attendance in dailyAttendances) {
+      switch (attendance.status) {
+        case AttendanceStatus.present:
+          presentDays++;
+          break;
+        case AttendanceStatus.absent:
+          absentDays++;
+          break;
+        case AttendanceStatus.halfDay:
+          halfDays++;
+          break;
+        default:
+          break;
+      }
+
+      totalWorkHours += attendance.totalHours ?? 0;
+      totalOvertimeHours += attendance.overtimeHours ?? 0;
+    }
+
+    final totalWorkingDays = presentDays + halfDays;
+    final averageWorkHours =
+        totalWorkingDays > 0 ? totalWorkHours ~/ totalWorkingDays : 0;
+
+    return AttendanceSummary(
+      month: month,
+      year: year,
+      presentDays: presentDays,
+      absentDays: absentDays,
+      halfDays: halfDays,
+      totalWorkHours: totalWorkHours,
+      totalOvertimeHours: totalOvertimeHours,
+      averageWorkHours: averageWorkHours,
+      attendances: dailyAttendances.reversed.toList(),
+    );
   }
+
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+// Future<AttendanceSummary> getMonthlyAttendanceSummary({
+//   required String userId,
+//   required int year,
+//   required int month,
+// }) async {
+//     try {
+//       final now = DateTime.now();
+//       DateTime endDate = DateTime(year, month + 1, 0);
+//       endDate = endDate.compareTo(now) > 0 ? now : endDate;
+//       DateTime startDate = DateTime(year, month, 1);
+//
+//       final attendances = await getAttendanceHistory(
+//           userId: userId, startDate: startDate, endDate: endDate, limit: 31);
+//
+//       List<AttendanceModel> dates = [];
+//       while (startDate.compareTo(endDate) <= 0) {
+//         dates.add(attendances.firstWhere(
+//             (attendances) => attendances.date.compareTo(startDate) == 0,
+//             orElse: () {
+//           final status = (startDate.weekday == DateTime.saturday)
+//               ? AttendanceStatus.weekend
+//               : AttendanceStatus.absent;
+//           return AttendanceModel(
+//               date: startDate,
+//               checkInTime: null,
+//               checkOutTime: null,
+//               userId: userId,
+//               officeLocationId: attendances.first.officeLocationId,
+//               workType: WorkType.office,
+//               status: status);
+//         }));
+//
+//         startDate = startDate.add(
+//             Duration(days: (startDate.weekday == DateTime.saturday) ? 2 : 1));
+//       }
+//
+//       int presentDays = 0;
+//       int absentDays = 0;
+//       int halfDays = 0;
+//       int totalWorkHours = 0;
+//       int totalOvertimeHours = 0;
+//
+//       for (var attendance in dates) {
+//         switch (attendance.status) {
+//           case AttendanceStatus.present:
+//             presentDays++;
+//             break;
+//           case AttendanceStatus.absent:
+//             absentDays++;
+//             break;
+//           case AttendanceStatus.halfDay:
+//             halfDays++;
+//             break;
+//           default:
+//             break;
+//         }
+//
+//         final totalHours = attendance.totalHours;
+//         final overtimeTotalHours = attendance.overtimeHours;
+//         if (totalHours != null) {
+//           totalWorkHours += totalHours;
+//         }
+//         if (overtimeTotalHours != null) {
+//           totalOvertimeHours += overtimeTotalHours;
+//         }
+//       }
+//
+//       final totalDays = presentDays + halfDays;
+//       int? averageWorkHours;
+//       if (totalDays > 0) {
+//         averageWorkHours = totalWorkHours ~/ totalDays;
+//       }
+//
+//       return AttendanceSummary(
+//         month: month,
+//         year: year,
+//         presentDays: presentDays,
+//         absentDays: absentDays,
+//         halfDays: halfDays,
+//         totalWorkHours: totalWorkHours,
+//         totalOvertimeHours: totalOvertimeHours,
+//         averageWorkHours: averageWorkHours ?? 0,
+//         attendances: dates.reversed.toList(),
+//       );
+//     } catch (e) {
+//       print('Error getting monthly summary: $e');
+//       return AttendanceSummary(
+//         month: month,
+//         year: year,
+//         presentDays: 0,
+//         absentDays: 0,
+//         halfDays: 0,
+//         totalWorkHours: 0,
+//         totalOvertimeHours: 0,
+//         averageWorkHours: 0,
+//         attendances: [],
+//       );
+//     }
+//   }
 }
 
 // Result classes
@@ -365,7 +469,6 @@ class AttendanceSummary {
   final int presentDays;
   final int absentDays;
   final int halfDays;
-  final int lateDays;
   final int totalWorkHours;
   final int averageWorkHours;
   final int totalOvertimeHours;
@@ -377,7 +480,6 @@ class AttendanceSummary {
     required this.presentDays,
     required this.absentDays,
     required this.halfDays,
-    this.lateDays = 0,
     required this.totalWorkHours,
     required this.averageWorkHours,
     required this.totalOvertimeHours,

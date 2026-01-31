@@ -18,6 +18,7 @@ export 'services/location_service.dart';
 export 'services/office_location_service.dart';
 export 'services/attendance_service.dart';
 export 'services/user_service.dart';
+export 'services/leave_service.dart';
 
 export 'theme/light_theme.dart';
 export 'theme/dark_theme.dart';

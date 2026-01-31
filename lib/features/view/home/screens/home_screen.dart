@@ -10,6 +10,11 @@ class AttendanceScreen extends StatelessWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: ClampingScrollPhysics(),
-            children: [AttendanceAppBar(), TotalAttendance(), Dashboard()]));
+            children: [
+          AttendanceAppBar(),
+          attendanceSummary(isHome: true),
+          leaveSummary(isHome: true),
+          Dashboard()
+        ]));
   }
 }
